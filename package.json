@@ -2,14 +2,18 @@
   "name": "ember-template-lint-plugin-denylist",
   "version": "0.0.0",
   "description": "`ember-template-lint` plugin for setting attribute denylists",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
-    "pretest": "npm run lint",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "posttest": "npm run format",
-    "lint": "eslint . --cache --fix",
-    "prepare": "husky install",
-    "format": "prettier --loglevel warn --write \"**/*.{js,css,md}\""
+    "test": "npm-run-all lint:* test:*",
+    "test:jest": "jest test",
+    "lint:js": "eslint . --cache --fix",
+    "build": "tsc --build",
+    "build:watch": "tsc --watch",
+    "prepare": "husky install && yarn build"
   },
   "repository": {
     "type": "git",
@@ -22,23 +26,37 @@
     "denylist",
     "attribute"
   ],
-  "author": "Shane Martin",
+  "author": "Shane Martin <dev.sh@nemart.in>",
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/shamrt/ember-template-lint-plugin-denylist/issues"
   },
   "homepage": "https://github.com/shamrt/ember-template-lint-plugin-denylist#readme",
+  "dependencies": {
+    "tslib": "^2.3.1"
+  },
   "devDependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.24",
+    "ember-template-lint": "^3.14.1",
     "eslint": "^8.13.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.1.4",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
+    "jest": "^27.5.1",
     "lint-staged": "^12.3.8",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.6.2"
+  },
+  "peerDependencies": {
+    "ember-template-lint": "^3.4.1"
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix"
