@@ -4,7 +4,12 @@
   "description": "`ember-template-lint` plugin for setting attribute denylists",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretest": "npm run lint",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "posttest": "npm run format",
+    "lint": "eslint . --cache --fix",
+    "prepare": "husky install",
+    "format": "prettier --loglevel warn --write \"**/*.{js,css,md}\""
   },
   "repository": {
     "type": "git",
@@ -22,5 +27,20 @@
   "bugs": {
     "url": "https://github.com/shamrt/ember-template-lint-plugin-denylist/issues"
   },
-  "homepage": "https://github.com/shamrt/ember-template-lint-plugin-denylist#readme"
+  "homepage": "https://github.com/shamrt/ember-template-lint-plugin-denylist#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
+    "eslint": "^8.13.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.8",
+    "prettier": "^2.6.2"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
+  }
 }
