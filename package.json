@@ -1,0 +1,26 @@
+{
+  "name": "ember-template-lint-plugin-denylist",
+  "version": "0.0.0",
+  "description": "`ember-template-lint` plugin for setting attribute denylists",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shamrt/ember-template-lint-plugin-denylist.git"
+  },
+  "keywords": [
+    "ember-template-lint",
+    "ember-template-lint-plugin",
+    "plugin",
+    "denylist",
+    "attribute"
+  ],
+  "author": "Shane Martin",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/shamrt/ember-template-lint-plugin-denylist/issues"
+  },
+  "homepage": "https://github.com/shamrt/ember-template-lint-plugin-denylist#readme"
+}
