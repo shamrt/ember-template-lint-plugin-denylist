@@ -6,5 +6,6 @@ module.exports = {
   },
   rules: {
     'jest/require-hook': 'off',
+    'jest/no-standalone-expect': 'off',
   },
 };
