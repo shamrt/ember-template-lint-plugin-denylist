@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-ignore max-classes-per-file */
 declare module 'ember-template-lint' {
   import { AST } from 'ember-template-recast';
@@ -27,12 +28,24 @@ declare module 'ember-template-lint' {
     log(argument: LogArgument): void;
   }
 
-  export class ASTHelpers {
-    static findAttribute(
-      node: AST.ElementNode,
-      attribute: string
-    ): AST.AttrNode;
-  }
+  export const ASTHelpers = {
+    findAttribute(node: AST.ElementNode, attribute: string): AST.AttrNode;,
+  };
+
+  export function generateRuleTests(arguments: {
+    name: string;
+    groupingMethod: Function;
+    testMethod: Function;
+    config: Record<string, unknown> | boolean;
+    plugins: Record<string, unknown>[];
+    good?: (Record<string, unknown> | string)[];
+    bad?: (Record<string, unknown> | string)[];
+    skipDisabledTests?: boolean;
+    groupingMethodEach?: Function;
+    groupMethodBefore?: Function;
+    focusMethod?: () => void;
+    meta?: object;
+  }): void;
 }
 
 declare module 'ember-template-lint/lib/helpers/create-error-message';
