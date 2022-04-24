@@ -6,10 +6,9 @@ module.exports = {
     sourceType: 'module',
   },
   extends: [
-    'airbnb-base',
     'plugin:node/recommended',
-    'plugin:import/recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:unicorn/recommended',
     'plugin:prettier/recommended',
   ],
   env: {
