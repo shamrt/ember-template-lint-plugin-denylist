@@ -37,8 +37,30 @@ describe('no-class-name', () => {
           source: `<div class="foo"></div>`,
         },
       },
-      // `<div class="foo bar"></div>`, // multiple class names, with exact `foo` match
-      // `<div class="foobar"></div>`, // `foo` substring in class name
+      {
+        template: `<div class="foobar"></div>`,
+        result: {
+          message: `The value 'foo' is present in attribute 'class', but is forbidden`,
+          line: 1,
+          column: 5,
+          endLine: 1,
+          endColumn: 19,
+          isFixable: false,
+          source: `<div class="foobar"></div>`,
+        },
+      },
+      {
+        template: `<div class="foo bar"></div>`,
+        result: {
+          message: `The value 'foo' is present in attribute 'class', but is forbidden`,
+          line: 1,
+          column: 5,
+          endLine: 1,
+          endColumn: 20,
+          isFixable: false,
+          source: `<div class="foo bar"></div>`,
+        },
+      },
     ],
   });
 });

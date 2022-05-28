@@ -14,6 +14,13 @@ const isValidAttributes = (attributes: unknown) =>
     return difference(attributeKeys, ['name', 'values']).length === 0;
   });
 
+const hasForbiddenAttribute = (
+  attributeValues: string,
+  forbiddenValue: string
+) => {
+  return attributeValues.includes(forbiddenValue);
+};
+
 export default class DenylistRule extends Rule {
   parseConfig(config: FullDenylistConfig): FullDenylistConfig {
     if (config === true) {
@@ -62,11 +69,7 @@ export default class DenylistRule extends Rule {
               break;
           }
 
-          const allAttributeValues = attributeValues
-            .replace(/\s+/g, ' ')
-            .split(' ');
-
-          if (allAttributeValues.includes(forbiddenValue)) {
+          if (hasForbiddenAttribute(attributeValues, forbiddenValue)) {
             this.log({
               message: `The value '${forbiddenValue}' is present in attribute '${attributeName}', but is forbidden`,
               line: attribute.loc && attribute.loc.start.line,
