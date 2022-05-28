@@ -3,7 +3,7 @@ import { AST } from 'ember-template-recast';
 import createErrorMessage from 'ember-template-lint/lib/helpers/create-error-message';
 import { difference } from 'lodash';
 
-import { FullDenylistConfig } from '../types';
+import { ForbiddenValues, FullDenylistConfig } from '../types';
 
 export const DEFAULT_CONFIG = { attributes: [] };
 
@@ -16,10 +16,13 @@ const isValidAttributes = (attributes: unknown) =>
 
 const hasForbiddenAttribute = (
   attributeValues: string,
-  forbiddenValue: string
-) => {
-  return attributeValues.includes(forbiddenValue);
-};
+  forbiddenValues: ForbiddenValues
+): boolean =>
+  Array.isArray(forbiddenValues)
+    ? forbiddenValues.some((forbiddenValue) =>
+        hasForbiddenAttribute(attributeValues, forbiddenValue)
+      )
+    : attributeValues.includes(forbiddenValues);
 
 export default class DenylistRule extends Rule {
   parseConfig(config: FullDenylistConfig): FullDenylistConfig {
@@ -69,16 +72,22 @@ export default class DenylistRule extends Rule {
               break;
           }
 
-          if (hasForbiddenAttribute(attributeValues, forbiddenValue)) {
-            this.log({
-              message: `The value '${forbiddenValue}' is present in attribute '${attributeName}', but is forbidden`,
-              line: attribute.loc && attribute.loc.start.line,
-              column: attribute.loc && attribute.loc.start.column,
-              endLine: attribute.loc && attribute.loc.end.line,
-              endColumn: attribute.loc && attribute.loc.end.column,
-              source: this.sourceForNode(node),
-              isFixable: false,
-            });
+          const forbiddenValues = Array.isArray(forbiddenValue)
+            ? forbiddenValue
+            : [forbiddenValue];
+
+          for (const value of forbiddenValues) {
+            if (hasForbiddenAttribute(attributeValues, value)) {
+              this.log({
+                message: `The value '${value}' is present in attribute '${attributeName}', but is forbidden`,
+                line: attribute.loc && attribute.loc.start.line,
+                column: attribute.loc && attribute.loc.start.column,
+                endLine: attribute.loc && attribute.loc.end.line,
+                endColumn: attribute.loc && attribute.loc.end.column,
+                source: this.sourceForNode(node),
+                isFixable: false,
+              });
+            }
           }
         }
       },
