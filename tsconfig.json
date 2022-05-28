@@ -16,9 +16,11 @@
 
     "baseUrl": ".",
     "paths": {
-      "*": ["./types/*"]
+      "ember-template-lint-plugin-denylist": ["src/index"],
+      "ember-template-lint-plugin-denylist/*": ["src/*"],
+      "*": ["types/*"]
     }
   },
-  "include": ["./src"],
+  "include": ["src", "test"],
   "exclude": ["**/node_modules/**"]
 }

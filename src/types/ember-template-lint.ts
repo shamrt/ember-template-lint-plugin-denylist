@@ -7,8 +7,10 @@ declare module 'ember-template-lint' {
     message: string;
     line: number;
     column: number;
+    endLine: number;
+    endColumn: number;
     source: string;
-    isFixable: boolean;
+    isFixable?: boolean;
   }
 
   export class Rule {
