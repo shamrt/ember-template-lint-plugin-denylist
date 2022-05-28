@@ -20,8 +20,17 @@ const hasForbiddenAttribute = (
 ): boolean => {
   if (rawValue.startsWith('^') && rawValue.endsWith('$')) {
     const value = rawValue.slice(1, -1);
-    console.log('value', value);
     return attributeValues.split(' ').includes(value);
+  } else if (rawValue.startsWith('^')) {
+    const value = rawValue.slice(1);
+    return attributeValues
+      .split(' ')
+      .some((attributeValue) => attributeValue.startsWith(value));
+  } else if (rawValue.endsWith('$')) {
+    const value = rawValue.slice(0, -1);
+    return attributeValues
+      .split(' ')
+      .some((attributeValue) => attributeValue.endsWith(value));
   } else {
     return attributeValues.includes(rawValue);
   }

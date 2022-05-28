@@ -146,4 +146,95 @@ describe('no-class-name', () => {
       })
     );
   });
+
+  describe('starts with value', () => {
+    const config: FullDenylistConfig = {
+      attributes: [{ name: 'class', values: '^test__' }],
+    };
+
+    generateRuleTests(
+      Object.assign(baseRuleHarness, {
+        config,
+
+        good: [
+          `<div class=""></div>`, // empty class name
+          `<div class="footest__"></div>`, // has prefix
+          `<div class="footest__baz"></div>`, // in middle of class
+        ],
+
+        bad: [
+          // exact match
+          {
+            template: `<div class="test__"></div>`,
+            result: {
+              message: `The value '^test__' is present in attribute 'class', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 19,
+              isFixable: false,
+              source: `<div class="test__"></div>`,
+            },
+          },
+          {
+            template: `<div class="test__barbaz"></div>`,
+            result: {
+              message: `The value '^test__' is present in attribute 'class', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 25,
+              isFixable: false,
+              source: `<div class="test__barbaz"></div>`,
+            },
+          },
+        ],
+      })
+    );
+  });
+
+  describe('ends with value', () => {
+    const config: FullDenylistConfig = {
+      attributes: [{ name: 'class', values: 'bar$' }],
+    };
+
+    generateRuleTests(
+      Object.assign(baseRuleHarness, {
+        config,
+
+        good: [
+          `<div class=""></div>`, // empty class name
+          `<div class="barfoo"></div>`, // has suffix
+          `<div class="foobarbaz"></div>`, // in middle of class
+        ],
+
+        bad: [
+          {
+            template: `<div class="bar"></div>`,
+            result: {
+              message: `The value 'bar$' is present in attribute 'class', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 16,
+              isFixable: false,
+              source: `<div class="bar"></div>`,
+            },
+          },
+          {
+            template: `<div class="foobar"></div>`,
+            result: {
+              message: `The value 'bar$' is present in attribute 'class', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 19,
+              isFixable: false,
+              source: `<div class="foobar"></div>`,
+            },
+          },
+        ],
+      })
+    );
+  });
 });
