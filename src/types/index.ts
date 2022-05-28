@@ -1,8 +1,6 @@
-export type ForbiddenValues = string | string[];
-
 type Attribute = {
   name: Attribute | string;
-  values: ForbiddenValues;
+  values: string | string[];
 };
 
 export type DenylistConfig = {

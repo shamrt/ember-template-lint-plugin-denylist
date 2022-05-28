@@ -3,7 +3,7 @@ import { AST } from 'ember-template-recast';
 import createErrorMessage from 'ember-template-lint/lib/helpers/create-error-message';
 import { difference } from 'lodash';
 
-import { ForbiddenValues, FullDenylistConfig } from '../types';
+import { FullDenylistConfig } from '../types';
 
 export const DEFAULT_CONFIG = { attributes: [] };
 
