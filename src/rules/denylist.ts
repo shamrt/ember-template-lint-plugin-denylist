@@ -16,13 +16,16 @@ const isValidAttributes = (attributes: unknown) =>
 
 const hasForbiddenAttribute = (
   attributeValues: string,
-  forbiddenValues: ForbiddenValues
-): boolean =>
-  Array.isArray(forbiddenValues)
-    ? forbiddenValues.some((forbiddenValue) =>
-        hasForbiddenAttribute(attributeValues, forbiddenValue)
-      )
-    : attributeValues.includes(forbiddenValues);
+  rawValue: string
+): boolean => {
+  if (rawValue.startsWith('^') && rawValue.endsWith('$')) {
+    const value = rawValue.slice(1, -1);
+    console.log('value', value);
+    return attributeValues.split(' ').includes(value);
+  } else {
+    return attributeValues.includes(rawValue);
+  }
+};
 
 export default class DenylistRule extends Rule {
   parseConfig(config: FullDenylistConfig): FullDenylistConfig {
