@@ -30,9 +30,13 @@ declare module 'ember-template-lint' {
     log(argument: LogArgument): void;
   }
 
-  export const ASTHelpers = {
-    findAttribute(node: AST.ElementNode, attribute: string): AST.AttrNode;,
-  };
+  // eslint-disable-next-line unicorn/no-static-only-class
+  export class ASTHelpers {
+    static findAttribute(
+      node: AST.ElementNode,
+      attribute: string
+    ): AST.AttrNode;
+  }
 
   export function generateRuleTests(arguments: {
     name: string;
