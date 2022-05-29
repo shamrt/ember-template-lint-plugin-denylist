@@ -36,7 +36,7 @@ module.exports = {
 #### attributes
 
 - array -- An array of objects with the following properties:
-  - attribute -- string: HTML attribute to target
+  - name -- string: HTML attribute to target
   - values -- string|string[]: Value or list of values to forbid
     - Special characters:
       - Prepending a value with `^` only forbids matches from the beginning of a value (e.g., `'^foo'` matches `'foobar'` but not `'barfoo'`)
