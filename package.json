@@ -1,6 +1,6 @@
 {
   "name": "ember-template-lint-plugin-denylist",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "`ember-template-lint` plugin for setting attribute denylists",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
