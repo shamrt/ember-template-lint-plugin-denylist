@@ -170,4 +170,31 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       })
     );
   });
+
+  describe('multiple configured attributes', () => {
+    const config: FullDenylistConfig = {
+      attributes: [
+        { name: attributeName, values: 'bar$' },
+        { name: 'data-x', values: ['^yo$', 'quox'] },
+      ],
+    };
+
+    generateRuleTests(
+      Object.assign(baseRuleHarness, {
+        config,
+
+        good: [
+          `<div ${attributeName}=""></div>`, // empty class name
+          `<div ${attributeName}="barfoo"></div>`, // has suffix
+          `<div ${attributeName}="foobarbaz"></div>`, // in middle of class
+        ],
+
+        bad: [
+          ...buildBadTests('bar$')([`"bar"`, `"foobar"`]),
+          ...buildBadTestsByAttribute('data-x')('^yo$')([`"yo"`]),
+          ...buildBadTestsByAttribute('data-x')('quox')([`"quox"`]),
+        ],
+      })
+    );
+  });
 });
