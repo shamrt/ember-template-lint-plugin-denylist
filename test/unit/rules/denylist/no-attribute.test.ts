@@ -3,6 +3,44 @@ import { generateRuleTests } from 'ember-template-lint';
 import plugin from '../../../../src';
 import { FullDenylistConfig } from '../../../../src/types';
 
+type ErrorLogResult = {
+  message: string;
+  line?: number;
+  column?: number;
+  endLine?: number;
+  endColumn?: number;
+  isFixable: boolean;
+  source: string;
+};
+
+type BadTestOutput = {
+  template: string;
+  result: ErrorLogResult;
+};
+
+/**
+ * Higher-order function for building bad test outputs via provided
+ * attribute, forbidden value, and array of attribute values.
+ *
+ * @private
+ */
+const buildBadTestsByAttribute =
+  (attributeName: string) =>
+  (forbiddenValue: string) =>
+  (attributeValues: string[]): BadTestOutput[] =>
+    attributeValues.map((attributeValue) => ({
+      template: `<div ${attributeName}=${attributeValue}></div>`,
+      result: {
+        message: `The value '${forbiddenValue}' is present in attribute '${attributeName}', but is forbidden`,
+        line: 1,
+        column: 5,
+        endLine: 1,
+        endColumn: 6 + attributeValue.length + attributeName.length,
+        isFixable: false,
+        source: `<div ${attributeName}=${attributeValue}></div>`,
+      },
+    }));
+
 const baseRuleHarness = {
   name: 'denylist',
 
@@ -15,6 +53,8 @@ const baseRuleHarness = {
 const ATTRIBUTE_NAMES = ['class', 'id', 'alt', 'title', 'data-testid'];
 
 describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
+  const buildBadTests = buildBadTestsByAttribute(attributeName);
+
   describe('string literal value', () => {
     const config: FullDenylistConfig = {
       attributes: [{ name: attributeName, values: 'foo' }],
@@ -34,68 +74,13 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
           `<div class="bar-{{baz}}"></div>`, // good class and mustache combined
         ],
 
-        bad: [
-          {
-            template: `<div ${attributeName}="foo"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 11 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foo"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="foobar"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 14 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foobar"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="foo bar"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 15 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foo bar"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="foo {{bar}}"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 19 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foo {{bar}}"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="baz {{bar}}-foo"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 23 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="baz {{bar}}-foo"></div>`,
-            },
-          },
-        ],
+        bad: buildBadTests('foo')([
+          `"foo"`,
+          `"foobar"`,
+          `"foo bar"`,
+          `"foo {{bar}}"`,
+          `"yo {{quox}}-foo"`,
+        ]),
       })
     );
   });
@@ -116,30 +101,8 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
         ],
 
         bad: [
-          {
-            template: `<div ${attributeName}="test__quox"></div>`,
-            result: {
-              message: `The value 'test__' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 18 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="test__quox"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="foobar"></div>`,
-            result: {
-              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 14 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foobar"></div>`,
-            },
-          },
+          ...buildBadTests('foo')([`"foobar"`]),
+          ...buildBadTests('test__')([`"test__quox"`]),
         ],
       })
     );
@@ -159,20 +122,7 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
           `<div ${attributeName}="foobar yofoo"></div>`, // not exact match
         ],
 
-        bad: [
-          {
-            template: `<div ${attributeName}="foo"></div>`,
-            result: {
-              message: `The value '^foo$' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 11 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foo"></div>`,
-            },
-          },
-        ],
+        bad: buildBadTests('^foo$')([`"foo"`, `"foo bar"`]),
       })
     );
   });
@@ -192,33 +142,11 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
           `<div ${attributeName}="footest__baz"></div>`, // in middle of class
         ],
 
-        bad: [
-          // exact match
-          {
-            template: `<div ${attributeName}="test__"></div>`,
-            result: {
-              message: `The value '^test__' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 14 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="test__"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="test__barbaz"></div>`,
-            result: {
-              message: `The value '^test__' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 20 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="test__barbaz"></div>`,
-            },
-          },
-        ],
+        bad: buildBadTests('^test__')([
+          `"test__"`,
+          `"test__barbaz"`,
+          `"foo test__barbaz"`,
+        ]),
       })
     );
   });
@@ -238,32 +166,7 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
           `<div ${attributeName}="foobarbaz"></div>`, // in middle of class
         ],
 
-        bad: [
-          {
-            template: `<div ${attributeName}="bar"></div>`,
-            result: {
-              message: `The value 'bar$' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 11 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="bar"></div>`,
-            },
-          },
-          {
-            template: `<div ${attributeName}="foobar"></div>`,
-            result: {
-              message: `The value 'bar$' is present in attribute '${attributeName}', but is forbidden`,
-              line: 1,
-              column: 5,
-              endLine: 1,
-              endColumn: 14 + attributeName.length,
-              isFixable: false,
-              source: `<div ${attributeName}="foobar"></div>`,
-            },
-          },
-        ],
+        bad: buildBadTests('bar$')([`"bar"`, `"foobar"`]),
       })
     );
   });
