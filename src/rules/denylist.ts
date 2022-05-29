@@ -7,13 +7,49 @@ import { FullDenylistConfig } from '../types';
 
 export const DEFAULT_CONFIG = { attributes: [] };
 
-const isValidAttributes = (attributes: unknown) =>
+/**
+ * Predicate for correctly configured attributes.
+ *
+ * @param attributes Configured attributes
+ * @returns Evaluation of valid attributes
+ * @private
+ */
+const isValidAttributes = (attributes: unknown): boolean =>
   Array.isArray(attributes) &&
   attributes.every((attribute) => {
     const attributeKeys = Object.keys(attribute).sort();
     return difference(attributeKeys, ['name', 'values']).length === 0;
   });
 
+/**
+ * Extract stringified values from attribute.
+ *
+ * @param attribute AST attribute node
+ * @returns String of attribute values
+ */
+const getAttributeValues = (attribute: AST.AttrNode): string => {
+  switch (attribute.value.type) {
+    case 'MustacheStatement':
+      return '';
+    case 'ConcatStatement':
+      const parts = attribute?.value?.parts ?? [];
+      return parts
+        .filter((part): part is AST.TextNode => part.type === 'TextNode')
+        .map((part) => part.chars)
+        .join(' ');
+    case 'TextNode':
+      return attribute.value.chars;
+  }
+};
+
+/**
+ * Predicate for whether a provided raw value is forbidden.
+ *
+ * @param attributeValues Attribute values
+ * @param rawValue Raw forbidden value
+ * @returns Evaluation of value acceptability
+ * @private
+ */
 const hasForbiddenAttribute = (
   attributeValues: string,
   rawValue: string
@@ -73,16 +109,7 @@ export default class DenylistRule extends Rule {
             continue;
           }
 
-          let attributeValues;
-          switch (attribute.value.type) {
-            case 'MustacheStatement':
-              return;
-            case 'ConcatStatement':
-              return;
-            case 'TextNode':
-              attributeValues = attribute.value.chars;
-              break;
-          }
+          const attributeValues = getAttributeValues(attribute);
 
           const forbiddenValues = Array.isArray(forbiddenValue)
             ? forbiddenValue

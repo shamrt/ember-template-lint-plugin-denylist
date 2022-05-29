@@ -28,6 +28,10 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
           `<div ${attributeName}=""></div>`, // empty class name
           `<div ${attributeName}="bar"></div>`, // different class name
           `<div ${attributeName}="bar baz"></div>`, // multiple class names
+          `<div class={{yo}}></div>`, // only mustache statement
+          `<div class="{{quox}}"></div>`, // single mustache inside quotes
+          `<div class="bar {{baz}}"></div>`, // good class plus mustache
+          `<div class="bar-{{baz}}"></div>`, // good class and mustache combined
         ],
 
         bad: [
@@ -65,6 +69,30 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
               endColumn: 15 + attributeName.length,
               isFixable: false,
               source: `<div ${attributeName}="foo bar"></div>`,
+            },
+          },
+          {
+            template: `<div ${attributeName}="foo {{bar}}"></div>`,
+            result: {
+              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 19 + attributeName.length,
+              isFixable: false,
+              source: `<div ${attributeName}="foo {{bar}}"></div>`,
+            },
+          },
+          {
+            template: `<div ${attributeName}="baz {{bar}}-foo"></div>`,
+            result: {
+              message: `The value 'foo' is present in attribute '${attributeName}', but is forbidden`,
+              line: 1,
+              column: 5,
+              endLine: 1,
+              endColumn: 23 + attributeName.length,
+              isFixable: false,
+              source: `<div ${attributeName}="baz {{bar}}-foo"></div>`,
             },
           },
         ],
