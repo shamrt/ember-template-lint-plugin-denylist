@@ -19,6 +19,18 @@ type BadTestOutput = {
 };
 
 /**
+ * Higher-order function for building good tests via provided
+ * attribute and array of attribute values.
+ *
+ * @private
+ */
+const buildGoodTestsByAttribute =
+  (attributeName: string) => (attributeValues: string[]) =>
+    attributeValues.map(
+      (attributeValue) => `<div ${attributeName}=${attributeValue}></div>`
+    );
+
+/**
  * Higher-order function for building bad test outputs via provided
  * attribute, forbidden value, and array of attribute values.
  *
@@ -53,6 +65,7 @@ const baseRuleHarness = {
 const ATTRIBUTE_NAMES = ['class', 'id', 'alt', 'title', 'data-testid'];
 
 describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
+  const buildGoodTests = buildGoodTestsByAttribute(attributeName);
   const buildBadTests = buildBadTestsByAttribute(attributeName);
 
   describe('string literal value', () => {
@@ -64,15 +77,15 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="bar"></div>`, // different class name
-          `<div ${attributeName}="bar baz"></div>`, // multiple class names
-          `<div class={{yo}}></div>`, // only mustache statement
-          `<div class="{{quox}}"></div>`, // single mustache inside quotes
-          `<div class="bar {{baz}}"></div>`, // good class plus mustache
-          `<div class="bar-{{baz}}"></div>`, // good class and mustache combined
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"bar"`, // different attribute value
+          `"bar baz"`, // multiple attribute names
+          `{{yo}}`, // only mustache statement
+          `"{{quox}}"`, // single mustache inside quotes
+          `"bar {{baz}}"`, // good attribute value plus a mustache
+          `"bar-{{baz}}"`, // good attribute value and mustache combined
+        ]),
 
         bad: buildBadTests('foo')([
           `"foo"`,
@@ -94,11 +107,11 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="yo"></div>`, // different class name
-          `<div ${attributeName}="fop test"></div>`, // multiple, incomplete class names
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"yo"`, // different attribute value
+          `"fop test"`, // multiple, not-quite-bad attribute values
+        ]),
 
         bad: [
           ...buildBadTests('foo')([`"foobar"`]),
@@ -117,10 +130,10 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="foobar yofoo"></div>`, // not exact match
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"foobar yofoo"`, // not exact match
+        ]),
 
         bad: buildBadTests('^foo$')([`"foo"`, `"foo bar"`]),
       })
@@ -136,11 +149,11 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="footest__"></div>`, // has prefix
-          `<div ${attributeName}="footest__baz"></div>`, // in middle of class
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"footest__"`, // has prefix
+          `"footest__baz"`, // in middle of attribute value
+        ]),
 
         bad: buildBadTests('^test__')([
           `"test__"`,
@@ -160,11 +173,11 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="barfoo"></div>`, // has suffix
-          `<div ${attributeName}="foobarbaz"></div>`, // in middle of class
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"barfoo"`, // has suffix
+          `"foobarbaz"`, // in middle of attribute value
+        ]),
 
         bad: buildBadTests('bar$')([`"bar"`, `"foobar"`]),
       })
@@ -183,11 +196,11 @@ describe.each(ATTRIBUTE_NAMES)('no-attribute (%s)', (attributeName) => {
       Object.assign(baseRuleHarness, {
         config,
 
-        good: [
-          `<div ${attributeName}=""></div>`, // empty class name
-          `<div ${attributeName}="barfoo"></div>`, // has suffix
-          `<div ${attributeName}="foobarbaz"></div>`, // in middle of class
-        ],
+        good: buildGoodTests([
+          `""`, // empty attribute value
+          `"barfoo"`, // has suffix
+          `"foobarbaz"`, // in middle of attribute value
+        ]),
 
         bad: [
           ...buildBadTests('bar$')([`"bar"`, `"foobar"`]),
